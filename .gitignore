@@ -26,3 +26,6 @@ go.work.sum
 
 # Goland
 .idea/
+
+# repl log
+repl.log
