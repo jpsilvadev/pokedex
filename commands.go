@@ -60,11 +60,11 @@ func commandMapb(cfg *config, args ...string) error {
 
 func commandExplore(cfg *config, areaName ...string) error {
 	if len(areaName) == 0 {
-		return errors.New("you need to provide an area name to explore")
+		return errors.New("you need to provide an area name to <explore>")
 	}
 
 	if len(areaName) > 1 {
-		return errors.New("you can only provide one area name to explore")
+		return errors.New("you can only provide one area name to <explore>")
 	}
 
 	locationArea := areaName[0]
@@ -84,10 +84,10 @@ func commandExplore(cfg *config, areaName ...string) error {
 
 func commandCatch(cfg *config, pokemonName ...string) error {
 	if len(pokemonName) == 0 {
-		return errors.New("you need to provide a pokemon name to catch")
+		return errors.New("you need to provide a pokemon name to <catch>")
 	}
 	if len(pokemonName) > 1 {
-		return errors.New("you can only provide one pokemon name to catch")
+		return errors.New("you can only provide one pokemon name to <catch>")
 	}
 
 	pokemonIdentifier := pokemonName[0]
@@ -109,7 +109,54 @@ func commandCatch(cfg *config, pokemonName ...string) error {
 		return nil
 	}
 
-	fmt.Printf("%v caught!\n", pokemonIdentifier)
+	fmt.Printf("%v was caught!\n", pokemonIdentifier)
+	fmt.Println("You may now inspect it with the <inspect> command")
 	cfg.pokedex.AddPokemon(pokemonIdentifier, pokemonData)
+	return nil
+}
+
+func commandInspect(cfg *config, name ...string) error {
+	if len(name) == 0 {
+		return errors.New("you need to provide a pokemon name to <inspect>")
+	}
+	if len(name) > 1 {
+		return errors.New("you can only provide one pokemon name to <inspect>")
+	}
+	pokemonIdentifier := name[0]
+
+	pokemonData, err := cfg.pokedex.InspectPokemon(pokemonIdentifier)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Name: %v\n", pokemonData.Name)
+	fmt.Printf("Height: %v\n", pokemonData.Height)
+	fmt.Printf("Weight: %v\n", pokemonData.Weight)
+	fmt.Println("Stats:")
+	for _, stat := range pokemonData.Stats {
+		fmt.Printf("  - %v: %v\n", stat.Name, stat.Value)
+	}
+	fmt.Println("Types:")
+	for _, t := range pokemonData.Types {
+		fmt.Printf(" - %v\n", t)
+	}
+	return nil
+}
+
+func commandPokedex(cfg *config, args ...string) error {
+	if len(args) > 0 {
+		return errors.New("<pokedex> command does not accept any arguments")
+	}
+
+	caughtPokemon := cfg.pokedex.ListCaughtPokemon()
+	if len(caughtPokemon) == 0 {
+		fmt.Println("You have not caught any pokemon yet")
+		return nil
+	}
+
+	fmt.Println("Your Pokedex:")
+	for _, pokemon := range caughtPokemon {
+		fmt.Printf(" - %v\n", pokemon)
+	}
 	return nil
 }
