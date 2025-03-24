@@ -29,3 +29,6 @@ go.work.sum
 
 # repl log
 repl.log
+
+# build executable
+pokedex
