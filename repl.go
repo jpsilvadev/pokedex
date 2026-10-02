@@ -7,7 +7,13 @@ import (
 	"strings"
 )
 
-func StartRepl() {
+type cliCommand struct {
+	name        string
+	description string
+	callback    func() error
+}
+
+func startRepl() {
 	reader := bufio.NewScanner(os.Stdin)
 
 	for {
@@ -22,7 +28,16 @@ func StartRepl() {
 		}
 
 		commandName := words[0]
-		fmt.Printf("Your command was: %s\n", commandName)
+
+		command, exists := getCommands()[commandName]
+		if !exists {
+			fmt.Println("Unknown command:", commandName)
+			continue
+		}
+		err := command.callback()
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 
 	if err := reader.Err(); err != nil {
@@ -32,4 +47,19 @@ func StartRepl() {
 
 func cleanInput(text string) []string {
 	return strings.Fields(strings.ToLower(text))
+}
+
+func getCommands() map[string]cliCommand {
+	return map[string]cliCommand{
+		"help": {
+			name:        "help",
+			description: "Displays a help message",
+			callback:    commandHelp,
+		},
+		"exit": {
+			name:        "exit",
+			description: "Exit the Pokedex",
+			callback:    commandExit,
+		},
+	}
 }

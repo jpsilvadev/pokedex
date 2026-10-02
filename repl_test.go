@@ -29,8 +29,6 @@ func TestCleanInput(t *testing.T) {
 
 	for _, c := range cases {
 		actual := cleanInput(c.input)
-		// Check the length of the actual slice
-		// if they don't match, use t.Errorf and continue to the next case
 		if len(actual) != len(c.expected) {
 			t.Errorf("lengths don't match: '%v' vs '%v'", actual, c.expected)
 			continue
