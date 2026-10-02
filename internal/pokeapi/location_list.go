@@ -51,3 +51,44 @@ func (c *Client) ListLocations(pageURL *string) (locationAreaResponse, error) {
 	c.cache.Add(url, data)
 	return locations, nil
 }
+
+func (c *Client) GetLocation(locationName string) (locationResponse, error) {
+	url := baseURL + "/location-area/" + locationName
+
+	if val, ok := c.cache.Get(url); ok {
+		location := locationResponse{}
+		err := json.Unmarshal(val, &location)
+		if err != nil {
+			return locationResponse{}, err
+		}
+		return location, nil
+	}
+
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return locationResponse{}, err
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return locationResponse{}, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return locationResponse{}, fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return locationResponse{}, err
+	}
+
+	var location locationResponse
+	if err := json.Unmarshal(data, &location); err != nil {
+		return locationResponse{}, err
+	}
+
+	c.cache.Add(url, data)
+	return location, nil
+}
